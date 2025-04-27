@@ -1,1 +1,1 @@
-!pip install transformers nltk scikit-learn torch
+#!pip install transformers nltk scikit-learn torch

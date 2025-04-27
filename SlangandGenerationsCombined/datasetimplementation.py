@@ -1,5 +1,5 @@
 # Install libraries
-!pip install transformers scikit-learn pandas matplotlib
+#!pip install transformers scikit-learn pandas matplotlib
 
 # Imports
 import pandas as pd

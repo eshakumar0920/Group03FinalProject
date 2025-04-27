@@ -1,5 +1,5 @@
 # Install libraries (if not already installed)
-!pip install transformers nltk scikit-learn torch pandas matplotlib
+#!pip install transformers nltk scikit-learn torch pandas matplotlib
 
 # Import libraries
 import nltk

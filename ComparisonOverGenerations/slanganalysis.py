@@ -1,15 +1,17 @@
 # Install libraries (if not already installed)
-!pip install transformers nltk scikit-learn torch pandas
+#!pip install transformers nltk scikit-learn torch pandas matplotlib
 
 # Import libraries
 import nltk
 import string
 import pandas as pd
+import matplotlib.pyplot as plt
 from nltk.corpus import wordnet
 from transformers import BertTokenizer, BertModel
 import torch
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+from sklearn.metrics import classification_report
 
 # Download NLTK data
 nltk.download('wordnet')
@@ -60,51 +62,73 @@ tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
 # Function to analyze sentence
 def detect_generation(sentence):
-    # Lowercase and clean
     sentence_clean = sentence.lower()
-
-    # Initialize scores
     generation_scores = {gen: 0 for gen in generation_slang.keys()}
     generation_matches = {gen: [] for gen in generation_slang.keys()}
 
-    # Check full slang phrases
     for gen, slang_dict in generation_slang.items():
         for slang_term in slang_dict.keys():
             if slang_term in sentence_clean:
                 generation_scores[gen] += 1
                 generation_matches[gen].append(slang_term)
 
-    # Determine best match
     if all(score == 0 for score in generation_scores.values()):
         best_gen = "No strong match"
     else:
         best_gen = max(generation_scores, key=generation_scores.get)
 
-    # Build result
-    result = {
-        "sentence": sentence,
-        "generation_scores": generation_scores,
-        "generation_matches": generation_matches,
-        "predicted_generation": best_gen
-    }
+    return best_gen, generation_matches
 
-    return result
+# Sample dataset
+data = {
+    "Sentence": [
+        "Yo that song slaps no cap.",
+        "Man, that party was groovy.",
+        "She is savage for throwing shade like that.",
+        "Dude, that trick was rad!",
+        "Adulting is so hard sometimes.",
+        "No cap this meal slaps fr fr.",
+        "Far out, that sunset was amazing.",
+        "Psyche! Just kidding.",
+        "Throwing shade is so petty.",
+        "This track slaps so hard."
+    ],
+    "True Generation": [
+        "Gen Z",
+        "Boomer",
+        "Millennial",
+        "Gen X",
+        "Millennial",
+        "Gen Z",
+        "Boomer",
+        "Gen X",
+        "Millennial",
+        "Gen Z"
+    ]
+}
 
-# Example sentences to test
-sentences = [
-    "Yo that song slaps no cap.",
-    "Man, that party was groovy.",
-    "She is savage for throwing shade like that.",
-    "Dude, that trick was rad!",
-    "Adulting is so hard sometimes."
-]
+# Create DataFrame
+df = pd.DataFrame(data)
 
-# Run detection
-for sent in sentences:
-    output = detect_generation(sent)
-    print(f"\nSentence: {output['sentence']}")
-    print(f"Predicted Generation: {output['predicted_generation']}")
-    print("Matches:")
-    for gen, matches in output['generation_matches'].items():
-        if matches:
-            print(f"  {gen}: {matches}")
+# Analyze dataset
+predicted_labels = []
+all_generation_matches = []
+
+for index, row in df.iterrows():
+    pred_gen, matches = detect_generation(row['Sentence'])
+    predicted_labels.append(pred_gen)
+    all_generation_matches.append(matches)
+
+df['Predicted Generation'] = predicted_labels
+
+# Print classification report
+print("\nClassification Report:")
+print(classification_report(df['True Generation'], df['Predicted Generation'], zero_division=0))
+
+# Save results
+df.to_csv("generation_slang_predictions.csv", index=False)
+print("\nSaved results to 'generation_slang_predictions.csv'")
+
+# Optional: Show the results table
+print("\nFull Results:")
+print(df)

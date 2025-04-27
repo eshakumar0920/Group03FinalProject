@@ -1,5 +1,5 @@
 # Install libraries (only needed once)
-!pip install transformers nltk scikit-learn torch
+#!pip install transformers nltk scikit-learn torch
 
 # Import libraries
 import nltk
