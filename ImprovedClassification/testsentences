@@ -1,0 +1,144 @@
+# Install libraries
+!pip install transformers nltk scikit-learn torch pandas
+
+# Import libraries
+import nltk
+import string
+import pandas as pd
+from nltk.corpus import wordnet
+from transformers import BertTokenizer, BertModel
+import torch
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+# Download NLTK data
+nltk.download('wordnet')
+
+# Load BERT model and tokenizer
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+model = BertModel.from_pretrained('bert-base-uncased')
+model.eval()
+
+# Helper Functions
+def get_contextual_embedding(word, sentence):
+    inputs = tokenizer(sentence, return_tensors="pt")
+    with torch.no_grad():
+        outputs = model(**inputs)
+    token_embeddings = outputs.last_hidden_state.squeeze(0)
+    token_ids = inputs["input_ids"][0]
+    decoded_tokens = [tokenizer.decode([id]) for id in token_ids]
+    for i, tok in enumerate(decoded_tokens):
+        if word.lower() in tok.lower():
+            return token_embeddings[i].numpy()
+    return None
+
+def is_used_slangy(word, sentence, threshold=0.55):
+    context_embed = get_contextual_embedding(word, sentence)
+    if context_embed is None:
+        return False
+    standard_sentence = f"The {word} is very common."
+    standard_embed = get_contextual_embedding(word, standard_sentence)
+    if standard_embed is None:
+        return False
+    similarity = cosine_similarity([context_embed], [standard_embed])[0][0]
+    return similarity < threshold
+
+# Build standard words set
+standard_words = set(lemma.name().lower() for synset in wordnet.all_synsets() for lemma in synset.lemmas())
+
+# Add basic English words manually
+basic_english_words = set([
+    "that", "this", "is", "are", "was", "were", "am", "be", "being", "been",
+    "have", "has", "had", "do", "does", "did", "the", "a", "an", "in", "on", "at",
+    "by", "for", "with", "about", "against", "between", "he", "she", "it", "they",
+    "we", "you", "i", "me", "him", "her", "us", "them", "my", "your", "our", "their",
+    "wanna", "gonna", "bro", "lemme", "ain't", "gotta", "bout"
+])
+
+# Define common stopwords
+stopwords = set(["the", "in", "on", "at", "of", "a", "and", "is", "was", "were", "to", "for", "it"])
+
+# Example slang dictionary
+slang_dict = {
+    'fr': 'for real',
+    'fit': 'outfit',
+    'fire': 'cool or amazing',
+    'cap': 'lie',
+    'bussin': 'really good',
+    'mid': 'average',
+    'rizz': 'charisma',
+    'lit': 'amazing',
+    'dead': 'something very funny',
+    'vibe': 'energy or atmosphere'
+}
+
+# Example sentences
+sentences = [
+    "Bro, that fit is straight fire, not gonna lie.",
+    "She really popped off with that outfit, fr.",
+    "I'm dead, that meme was hilarious af.",
+    "No cap, this food is bussin fr fr.",
+    "Lowkey wanna dip early, this party is mid.",
+    "His rizz is unreal, pulled three girls last night.",
+    "We outside tonight, let’s get lit.",
+    "That track is such a bop, it's on repeat.",
+    "Bestie, your vibe is immaculate today.",
+    "The fit between the pieces was very precise.",
+    "The fire alarm went off unexpectedly.",
+    "She is very talented in painting and sculpture."
+]
+
+# Classify each sentence
+for sentence in sentences:
+    print(f"\nSentence: \"{sentence}\"")
+    inputs = tokenizer(sentence, return_tensors="pt")
+    tokens = tokenizer.tokenize(sentence)
+
+    results = []
+
+    for word in tokens:
+        lw = word.lower().strip()
+
+        # Skip punctuation
+        if lw in string.punctuation:
+            continue
+
+        # Skip subword tokens
+        if lw.startswith('##'):
+            continue
+
+        # Force pronouns as Standard Word
+        if lw in {"i", "me", "you", "he", "she", "it", "we", "they", "him", "her", "us", "them", "my", "your", "our", "their"}:
+            box = "Standard Word"
+            results.append((word, box))
+            continue
+
+        # If it's a stopword, assume standard
+        if lw in stopwords:
+            box = "Standard Word"
+            results.append((word, box))
+            continue
+
+        in_standard = lw in standard_words or lw in basic_english_words
+        in_slang = lw in slang_dict
+
+        if in_standard and in_slang:
+            if is_used_slangy(word, sentence):
+                box = "Slang Use Detected via BERT"
+            else:
+                box = "Standard Use Detected via BERT"
+        elif in_standard:
+            if is_used_slangy(word, sentence):
+                box = "Slang Use Detected via BERT"
+            else:
+                box = "Standard Word"
+        elif in_slang:
+            box = "Slang Only"
+        else:
+            box = "Unknown/Not a Word"
+
+        results.append((word, box))
+
+    # Display nicely in a table
+    df = pd.DataFrame(results, columns=["Token", "Classification"])
+    print(df.to_string(index=False))
