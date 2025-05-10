@@ -1,55 +1,63 @@
-# Detecting and Analyzing Generational Slang with Language Models
+# Generational Slang Classification using BERT
 
-## Overview
-This project explores the detection of slang terms and classification of generational language across Boomers, Gen X, Millennials, and Gen Z.  
-We built a lightweight system that processes text, matches slang usage, and predicts the generation associated with that slang.
+This project explores the classification of generational language — Boomer, Gen X, Millennial, and Gen Z — based on slang usage. It combines rule-based scoring with BERT embeddings and machine learning models to evaluate how well different approaches capture generational patterns in language.
 
-## Project Structure
-- Dataset: 20,000 synthetic but realistic sentences:
-  - 80% slang-heavy sentences
-  - 10% neutral English sentences
-  - 10% typo and ambiguous slang
-- Model: Lightweight dictionary-based scoring system
-- Libraries Used: 
-  - HuggingFace Transformers (Tokenizer)
-  - pandas
-  - scikit-learn
-  - matplotlib
+## Project Contents
 
-## Files
-| File | Description |
-|:-----|:------------|
-| `generated_20k_dataset_realistic.csv` | Generated dataset (sentence + true generation) |
-| `generation_slang_predictions_20k_realistic.csv` | Predictions made by the model |
-| `slang_generation_final_report.pdf` | Final report following ACL template |
-| `slang_generation_presentation.pdf` | Final project slides |
+| File                           | Description                                      |
+|--------------------------------|--------------------------------------------------|
+| `CS4395_NLP_Final_Project.ipynb` | Main notebook containing all experiments         |
+| `noisy_slang_dataset.csv`         | Synthetic dataset with typos and shared slang    |
+| `README.md`                       | Project overview and methodology                 |
 
 ## Methodology
-1. Slang Dictionaries: Curated slang for each generation.
-2. Sentence Generation: Randomized conversational templates.
-3. Noise Injection: Neutral sentences + typo-induced slang.
-4. Detection: Tokenization + simple scoring by matching slang.
-5. Evaluation: Classification report (Precision, Recall, F1), Bar Charts.
 
-## Results
-| Metric | Value |
-|:-------|:------|
-| Accuracy | ~88–92% realistic |
-| Precision per Generation | 85–93% |
-| Recall per Generation | 84–91% |
-| F1 Score per Generation | 85–92% |
+- **Dataset Generation**  
+  Created a synthetic dataset of 20,000 sentences using slang from each generation. Added neutral sentences and typo/noise variants to simulate real-world ambiguity.
 
-- Some confusion occurred between Millennials and Gen Z (due to shared slang like "fire", "lit").
-- Noise and typos reduced overall model confidence, creating realistic error patterns.
+- **Preprocessing**  
+  Used Hugging Face's BERT tokenizer and extracted `[CLS]` token embeddings for sentence representation.
+
+- **Models Compared**
+  - Rule-based scorer (dictionary matching)
+  - Feedforward Neural Network (FFNN) using BERT embeddings
+  - Logistic Regression
+  - Support Vector Machine (SVM, Linear)
+
+## Results Summary
+
+### Clean Synthetic Dataset
+
+| Model                | Accuracy |
+|---------------------|----------|
+| Rule-based Scorer   | ~88%     |
+| FFNN + BERT         | ~83%     |
+| Logistic Regression | 100%     |
+| SVM (Linear)        | 100%     |
+
+### Noisy/Realistic Dataset
+
+| Model                | Accuracy |
+|---------------------|----------|
+| Logistic Regression | ~25%     |
+| SVM (Linear)        | ~25%     |
+
+Models performed well on clean, separable data, but struggled with noisy, ambiguous input where slang overlaps across generations.
+
+## Key Takeaways
+
+- BERT embeddings were highly effective at distinguishing generational slang in clean data.
+- On noisy input, performance dropped to near-random levels, revealing the difficulty of generalizing to real-world language variation.
+- The rule-based approach is fast and interpretable but limited in coverage.
 
 ## Future Work
-- Expand slang dictionaries with newer entries.
-- Fine-tune lightweight language models directly on social media slang.
-- Apply to real-world datasets from Twitter, TikTok, Reddit.
-- Analyze temporal slang drift across years.
 
-## Running the project
-1. Install libraries:
+- Fine-tune BERT directly on generational classification
+- Use real-world social media data (e.g., Reddit, Twitter, TikTok)
+- Analyze slang evolution over time
+- Explore model interpretability (e.g., attention visualizations)
+
+## Requirements
 
 ```bash
-pip install transformers scikit-learn pandas matplotlib
+pip install transformers pandas scikit-learn matplotlib
