@@ -1,63 +1,113 @@
+
 # Generational Slang Classification using BERT
 
-This project explores the classification of generational language — Boomer, Gen X, Millennial, and Gen Z — based on slang usage. It combines rule-based scoring with BERT embeddings and machine learning models to evaluate how well different approaches capture generational patterns in language.
+This project explores how slang can be used to identify generational language patterns — focusing on Boomers, Gen X, Millennials, and Gen Z. We combine rule-based techniques with modern NLP tools like BERT and machine learning models to test classification accuracy across both clean and noisy data.
 
-## Project Contents
+---
 
-| File                           | Description                                      |
-|--------------------------------|--------------------------------------------------|
-| `CS4395_NLP_Final_Project.ipynb` | Main notebook containing all experiments         |
-| `noisy_slang_dataset.csv`         | Synthetic dataset with typos and shared slang    |
-| `README.md`                       | Project overview and methodology                 |
+## Table of Contents
 
-## Methodology
+- [Slang Analyzer](#slang-analyzer)  
+- [Improved Classification](#improved-classification)  
+- [Comparison Over Generations](#comparison-over-generations)  
+- [Dataset Implementation](#dataset-implementation)  
+- [Feedforward Neural Network (FFNN)](#feedforward-neural-network-ffnn)  
+- [Logistic Regression and SVM](#logistic-regression-and-svm)  
+- [Key Takeaways](#key-takeaways)  
+- [Future Work](#future-work)  
+- [How to Run](#how-to-run)  
+- [Requirements](#requirements)  
+- [Project Structure](#project-structure)  
 
-- **Dataset Generation**  
-  Created a synthetic dataset of 20,000 sentences using slang from each generation. Added neutral sentences and typo/noise variants to simulate real-world ambiguity.
+---
 
-- **Preprocessing**  
-  Used Hugging Face's BERT tokenizer and extracted `[CLS]` token embeddings for sentence representation.
+## Slang Analyzer
 
-- **Models Compared**
-  - Rule-based scorer (dictionary matching)
-  - Feedforward Neural Network (FFNN) using BERT embeddings
-  - Logistic Regression
-  - Support Vector Machine (SVM, Linear)
+A rule-based scorer was built using generational slang dictionaries. The analyzer scans sentences for matching terms and tallies scores based on frequency and relevance. This fast, interpretable approach performs well on clean datasets but lacks flexibility on ambiguous inputs.
 
-## Results Summary
+---
 
-### Clean Synthetic Dataset
+## Improved Classification
 
-| Model                | Accuracy |
-|---------------------|----------|
-| Rule-based Scorer   | ~88%     |
-| FFNN + BERT         | ~83%     |
-| Logistic Regression | 100%     |
-| SVM (Linear)        | 100%     |
+To move beyond simple dictionary matching, we used BERT embeddings for richer sentence representations. These embeddings, which capture context and semantics, were used as input features for more advanced classifiers like FFNN, Logistic Regression, and SVM. This improved classification, particularly for clean inputs.
 
-### Noisy/Realistic Dataset
+---
 
-| Model                | Accuracy |
-|---------------------|----------|
-| Logistic Regression | ~25%     |
-| SVM (Linear)        | ~25%     |
+## Comparison Over Generations
 
-Models performed well on clean, separable data, but struggled with noisy, ambiguous input where slang overlaps across generations.
+This section evaluates model performance by generation. It highlights challenges in distinguishing generations with overlapping slang and showcases where models struggled, especially on noisy, mixed-generation sentences.
+
+---
+
+## Dataset Implementation
+
+We created a synthetic dataset of 20,000 sentences with the following characteristics:
+
+- Slang terms pulled from curated generational dictionaries  
+- Sentences labeled by generation  
+- Noise added via typos and neutral phrases to simulate realistic inputs  
+- Balanced class distribution for model training and testing  
+
+---
+
+## Feedforward Neural Network (FFNN)
+
+A dense neural network was trained on the BERT embeddings. The FFNN used ReLU activations and softmax output to classify sentences. It achieved strong performance on clean data but showed reduced generalization on noisy variants.
+
+---
+
+## Logistic Regression and SVM
+
+Two classic ML models were trained on BERT embeddings:
+
+- **Logistic Regression**: Achieved 100% accuracy on the clean dataset but dropped to ~25% on noisy data.  
+- **Support Vector Machine (SVM)**: Similar performance to logistic regression, showing that both models overfit to the clean structure and struggled with noise.
+
+---
 
 ## Key Takeaways
 
-- BERT embeddings were highly effective at distinguishing generational slang in clean data.
-- On noisy input, performance dropped to near-random levels, revealing the difficulty of generalizing to real-world language variation.
-- The rule-based approach is fast and interpretable but limited in coverage.
+- BERT embeddings significantly improved model understanding of slang context.
+- Rule-based methods were effective but limited by vocabulary scope.
+- All models performed poorly on noisy, real-world-like input, highlighting the need for domain adaptation.
+- Linear models overfit to clean synthetic data and failed to generalize.
+
+---
 
 ## Future Work
 
-- Fine-tune BERT directly on generational classification
-- Use real-world social media data (e.g., Reddit, Twitter, TikTok)
-- Analyze slang evolution over time
-- Explore model interpretability (e.g., attention visualizations)
+- Fine-tune BERT on a larger, real-world generational dataset  
+- Scrape social platforms like Twitter, TikTok, and Reddit for training data  
+- Add model explainability tools (e.g., SHAP, attention heatmaps)  
+- Study slang evolution over time and its cross-generational shifts  
+
+---
+
+## How to Run
+
+Launch the notebook:
+
+```bash
+jupyter notebook CS4395_NLP_Final_Project.ipynb
+```
+
+Or open in Google Colab.
+
+---
 
 ## Requirements
 
 ```bash
 pip install transformers pandas scikit-learn matplotlib
+```
+
+---
+
+## Project Structure
+
+| File                          | Description                                  |
+|------------------------------|----------------------------------------------|
+| `CS4395_NLP_Final_Project.ipynb` | Main notebook containing all code and outputs |
+| `noisy_slang_dataset.csv`    | Synthetic dataset with slang and noise       |
+| `README.md`                  | Project summary and methodology              |
+
