@@ -88,7 +88,7 @@ Two classic ML models were trained on BERT embeddings:
 Launch the notebook:
 
 ```bash
-jupyter notebook CS4395_NLP_Final_Project.ipynb
+jupyter notebook CS4395_NLP_Final_Project (1).ipynb
 ```
 
 Or open in Google Colab.
